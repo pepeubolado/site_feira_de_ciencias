@@ -1,0 +1,454 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verdade ou Fake News?</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f2f5;
+    color: #222;
+}
+
+header {
+    background: #172554;
+    color: white;
+    padding: 25px 15px;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 30px;
+}
+
+header p {
+    margin-top: 8px;
+    color: #cbd5e1;
+}
+
+.container {
+    max-width: 800px;
+    margin: 35px auto;
+    padding: 15px;
+}
+
+.progresso {
+    background: white;
+    padding: 18px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    text-align: center;
+    box-shadow: 0 2px 8px #0001;
+}
+
+.barra {
+    height: 9px;
+    background: #ddd;
+    border-radius: 10px;
+    margin-top: 12px;
+    overflow: hidden;
+}
+
+.barra div {
+    height: 100%;
+    width: 0%;
+    background: #2563eb;
+    transition: 0.3s;
+}
+
+.noticia {
+    background: white;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px #0001;
+}
+
+.numero {
+    color: #2563eb;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.noticia h2 {
+    font-size: 23px;
+    margin-bottom: 15px;
+}
+
+.descricao {
+    color: #555;
+    line-height: 1.7;
+    margin-bottom: 25px;
+}
+
+.pergunta {
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.botoes {
+    display: flex;
+    gap: 15px;
+}
+
+button {
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.botoes button {
+    width: 50%;
+    color: white;
+}
+
+.verdadeiro {
+    background: #16a34a;
+}
+
+.falso {
+    background: #dc2626;
+}
+
+button:hover {
+    filter: brightness(0.9);
+    transform: translateY(-2px);
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.resultado {
+    display: none;
+    margin-top: 22px;
+    padding: 18px;
+    border-radius: 10px;
+    line-height: 1.6;
+}
+
+.correto {
+    display: block;
+    background: #dcfce7;
+    color: #166534;
+}
+
+.incorreto {
+    display: block;
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.proximo {
+    width: 100%;
+    margin-top: 18px;
+    background: #172554;
+    color: white;
+}
+
+.final {
+    display: none;
+    background: white;
+    padding: 35px;
+    text-align: center;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px #0001;
+}
+
+.final h2 {
+    margin-bottom: 15px;
+}
+
+.pontuacao {
+    font-size: 42px;
+    color: #2563eb;
+    font-weight: bold;
+    margin: 20px;
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    color: #777;
+}
+
+@media(max-width: 500px) {
+    header h1 {
+        font-size: 24px;
+    }
+
+    .noticia {
+        padding: 18px;
+    }
+
+    .noticia h2 {
+        font-size: 20px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>📰 Verdade ou Fake News?</h1>
+    <p>Você consegue identificar notícias falsas?</p>
+</header>
+
+<div class="container">
+
+    <div class="progresso" id="progresso">
+        <strong id="contador">Notícia 1 de 4</strong>
+        <div class="barra">
+            <div id="barra"></div>
+        </div>
+    </div>
+
+    <div class="noticia" id="noticia">
+        <div class="numero" id="numero">NOTÍCIA 01</div>
+        <h2 id="titulo"></h2>
+        <p class="descricao" id="descricao"></p>
+
+        <p class="pergunta">
+            Essa notícia é verdadeira ou falsa?
+        </p>
+
+        <div class="botoes">
+            <button class="verdadeiro" onclick="responder(true)">
+                ✓ Verdadeira
+            </button>
+
+            <button class="falso" onclick="responder(false)">
+                ✕ Falsa
+            </button>
+        </div>
+
+        <div class="resultado" id="resultado"></div>
+
+        <button class="proximo" id="proximo"
+            onclick="avancar()" style="display:none">
+            Próxima notícia →
+        </button>
+    </div>
+
+    <div class="final" id="final">
+        <h2>🏆 Quiz finalizado!</h2>
+        <p>Sua pontuação foi:</p>
+        <div class="pontuacao" id="pontuacao"></div>
+        <p id="mensagem"></p>
+
+        <button class="proximo" onclick="reiniciar()">
+            ↻ Jogar novamente
+        </button>
+    </div>
+
+</div>
+
+<footer>
+    Projeto educativo • Quiz de notícias
+</footer>
+
+<script>
+
+const noticias = [
+{
+    titulo: "Brasil enfrenta previsão de fortes chuvas em novembro",
+    descricao: "O mês de novembro começou com previsão de chuvas em diversas regiões do Brasil. Segundo informações do Instituto Nacional de Meteorologia (Inmet), estados do Norte, Centro-Oeste e Sudeste poderiam registrar tempestades e trovoadas.",
+    resposta: true,
+    explicacao: "Correto! Esta notícia foi apresentada como verdadeira e baseada em informações meteorológicas. Consulte a fonte original para confirmar os detalhes: Agência Brasil e Inmet."
+},
+{
+    titulo: "Cientistas brasileiros anunciam descoberta de planta que brilha no escuro",
+    descricao: "Um grupo de pesquisadores brasileiros teria descoberto uma nova espécie de planta capaz de emitir luz própria durante a noite, em uma expedição na floresta amazônica.",
+    resposta: false,
+    explicacao: "Isso mesmo! Essa notícia foi inventada para o quiz. Não há uma fonte confiável apresentada que comprove essa descoberta."
+},
+{
+    titulo: "Escola brasileira cria aulas de inteligência artificial para crianças",
+    descricao: "Uma escola brasileira teria desenvolvido um projeto inovador para ensinar inteligência artificial a crianças a partir dos oito anos, com atividades de programação e tecnologia.",
+    resposta: false,
+    explicacao: "Correto! Essa notícia foi criada ficticiamente para o quiz e não representa um acontecimento verificado."
+},
+{
+    titulo: "Cidade brasileira anuncia projeto de ônibus gratuitos para toda a população",
+    descricao: "Uma cidade brasileira teria anunciado um projeto de transporte público gratuito, com ônibus elétricos e ampliação das linhas para os moradores.",
+    resposta: false,
+    explicacao: "Muito bem! Essa notícia também foi inventada. Não foi apresentada nenhuma cidade ou fonte que comprove o anúncio."
+},
+{
+    titulo: "Brasil sediou a reunião de cúpula do G20 no Rio de Janeiro em 2024",
+    descricao: "Em novembro de 2024, o Rio de Janeiro recebeu a reunião de líderes do G20, grupo que reúne importantes economias do mundo.",
+    resposta: true,
+    explicacao: "Verdadeira! A reunião de cúpula do G20 de 2024 aconteceu no Rio de Janeiro, nos dias 18 e 19 de novembro."
+},
+{
+    titulo: "A ONU confirmou a descoberta de vida em Marte",
+    descricao: "Uma publicação nas redes sociais afirma que a ONU confirmou oficialmente a existência de seres vivos em Marte após uma missão espacial secreta.",
+    resposta: false,
+    explicacao: "Falsa! Não existe confirmação oficial da descoberta de vida em Marte. Uma afirmação extraordinária como essa precisa ser verificada em fontes científicas confiáveis."
+},
+{
+    titulo: "A vacinação ajudou a erradicar a varíola no mundo",
+    descricao: "A Organização Mundial da Saúde declarou a erradicação da varíola em 1980, após uma campanha internacional de vacinação e vigilância.",
+    resposta: true,
+    explicacao: "Verdadeira! A varíola foi declarada erradicada pela Organização Mundial da Saúde em 1980."
+},
+{
+    titulo: "Tomar água gelada causa gripe",
+    descricao: "Uma mensagem compartilhada na internet afirma que beber água gelada provoca gripe porque o frio cria o vírus dentro do organismo.",
+    resposta: false,
+    explicacao: "Falsa! A gripe é causada por vírus influenza. Beber água gelada não cria o vírus nem é a causa da infecção."
+},
+{
+    titulo: "A Terra leva aproximadamente 365 dias para dar uma volta ao redor do Sol",
+    descricao: "O movimento de translação da Terra ao redor do Sol dura cerca de 365 dias e seis horas, período usado como base para o ano do calendário.",
+    resposta: true,
+    explicacao: "Verdadeira! A Terra leva aproximadamente 365 dias e um quarto para completar uma volta ao redor do Sol."
+},
+{
+    titulo: "A Amazônia é o único bioma brasileiro que possui rios",
+    descricao: "Um texto afirma que os demais biomas do Brasil não possuem rios e que toda a água doce superficial do país está concentrada na Amazônia.",
+    resposta: false,
+    explicacao: "Falsa! Todos os biomas brasileiros possuem rios e outros cursos d’água."
+},
+{
+    titulo: "O Brasil faz parte da América do Sul",
+    descricao: "O território brasileiro está localizado na América do Sul e faz fronteira com a maioria dos países sul-americanos.",
+    resposta: true,
+    explicacao: "Verdadeira! O Brasil está situado na América do Sul e compartilha fronteiras terrestres com dez países do continente."
+}
+];
+
+let atual = 0;
+let pontos = 0;
+let respondido = false;
+
+function carregarNoticia() {
+    const n = noticias[atual];
+
+    document.getElementById("numero").textContent =
+        "NOTÍCIA 0" + (atual + 1);
+
+    document.getElementById("titulo").textContent = n.titulo;
+    document.getElementById("descricao").textContent = n.descricao;
+
+    document.getElementById("contador").textContent =
+        "Notícia " + (atual + 1) + " de " + noticias.length;
+
+    document.getElementById("barra").style.width =
+        (atual / noticias.length * 100) + "%";
+
+    document.getElementById("resultado").style.display = "none";
+    document.getElementById("resultado").className = "resultado";
+
+    document.getElementById("proximo").style.display = "none";
+
+    document.querySelectorAll(".botoes button").forEach(botao => {
+        botao.disabled = false;
+    });
+
+    respondido = false;
+}
+
+function responder(escolha) {
+    if (respondido) return;
+
+    respondido = true;
+
+    const n = noticias[atual];
+    const resultado = document.getElementById("resultado");
+
+    const acertou = escolha === n.resposta;
+
+    if (acertou) {
+        pontos++;
+        resultado.className = "resultado correto";
+        resultado.innerHTML =
+            "✅ <strong>Parabéns! Você acertou!</strong><br>";
+    } else {
+        resultado.className = "resultado incorreto";
+        resultado.innerHTML =
+            "❌ <strong>Você errou!</strong><br>";
+    }
+
+    resultado.innerHTML +=
+        "Resposta correta: <strong>" +
+        (n.resposta ? "VERDADEIRA" : "FALSA") +
+        "</strong><br><br>" + n.explicacao;
+
+    document.querySelectorAll(".botoes button").forEach(botao => {
+        botao.disabled = true;
+    });
+
+    resultado.style.display = "block";
+
+    document.getElementById("proximo").style.display = "block";
+
+    document.getElementById("proximo").textContent =
+        atual === noticias.length - 1 ?
+        "Ver resultado final 🏆" : "Próxima notícia →";
+}
+
+function avancar() {
+    if (atual < noticias.length - 1) {
+        atual++;
+        carregarNoticia();
+    } else {
+        mostrarFinal();
+    }
+}
+
+function mostrarFinal() {
+    document.getElementById("noticia").style.display = "none";
+    document.getElementById("progresso").style.display = "none";
+    document.getElementById("final").style.display = "block";
+
+    document.getElementById("barra").style.width = "100%";
+
+    document.getElementById("pontuacao").textContent =
+        pontos + " / " + noticias.length;
+
+    let mensagem = "";
+
+    if (pontos === noticias.length) {
+        mensagem = "🏆 Excelente! Você identificou todas as notícias!";
+    } else if (pontos >= Math.ceil(noticias.length / 2)) {
+        mensagem = "👏 Muito bem! Você está aprendendo a identificar fake news.";
+    } else {
+        mensagem = "📚 Continue praticando! Sempre verifique as fontes das notícias.";
+    }
+
+    document.getElementById("mensagem").textContent = mensagem;
+}
+
+function reiniciar() {
+    atual = 0;
+    pontos = 0;
+
+    document.getElementById("noticia").style.display = "block";
+    document.getElementById("progresso").style.display = "block";
+    document.getElementById("final").style.display = "none";
+
+    carregarNoticia();
+}
+
+carregarNoticia();
+
+</script>
+
+</body>
+</html>
